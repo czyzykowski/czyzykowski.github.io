@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>czyzykowski.com - One problem with JavaScript promises</title>
+
+        <link rel="shortcut icon" href="../images/favicon.ico">
+        <link rel="stylesheet" href="../css/uikit.min.css">
+        <link rel="stylesheet" href="../css/syntax.css">
+    </head>
+    <body>
+        <div class="uk-container uk-width-xxlarge">
+            <hr class="uk-margin-xlarge-top" />
+            <nav class="uk-position-small uk-position-fixed uk-position-right">
+                
+                  <a class="uk-margin-right" href="../">Home</a>
+                
+                <a class="uk-margin-right" href="../about.html">About</a>
+                <a class="uk-margin-right" href="https://twitter.com/czyzykowski">Twitter</a>
+            </nav>
+
+            <article class="uk-article">
+
+    <h1 class="uk-article-title">One problem with JavaScript promises</h1>
+    
+        <p class="uk-text-lead uk-text-muted">Forget this and yours debugging will be harder</p>
+    
+
+		<section id="post-body">
+            <p>The promises are great. I love them. Their usage simplifies the task of managing a bunch of asynchronous tasks. The simplicity is in switching the context to future and encapsulating all it into an object. This gives new expressiveness to the code.</p>
+<p>There’s one problem with promises. They make it much harder to see if you missed any error handling.</p>
+<p>With traditional Node.js way you have an error as the first argument to the callback:</p>
+<div class="sourceCode"><pre class="sourceCode js"><code class="sourceCode javascript"><span class="kw">const</span> fs <span class="op">=</span> <span class="at">require</span>(<span class="st">'fs'</span>)<span class="op">;</span>
+
+<span class="va">fs</span>.<span class="at">stat</span>(<span class="st">'/etc/passwd'</span><span class="op">,</span> (err<span class="op">,</span> stats) <span class="op">=&gt;</span> <span class="op">{</span>
+  <span class="cf">if</span> (err) <span class="op">{</span>
+    <span class="va">console</span>.<span class="at">error</span>(err)<span class="op">;</span>
+  <span class="op">}</span>
+  <span class="co">// ... do something</span>
+<span class="op">}</span>)<span class="op">;</span></code></pre></div>
+<p>It’s obvious from just reading the code that you ignored the error. With the right tool (eslint for example) that fact will be singled out.</p>
+<p>The following code uses a promise but ignores the error looks fine and no simple tool will complain about it:</p>
+<div class="sourceCode"><pre class="sourceCode js"><code class="sourceCode javascript"><span class="kw">const</span> fsp <span class="op">=</span> <span class="at">require</span>(<span class="st">'fs-promise'</span>)<span class="op">;</span>
+
+<span class="va">fsp</span>.<span class="at">stat</span>(<span class="st">'/etc/passwd'</span>).<span class="at">then</span>(stat <span class="op">=&gt;</span> <span class="op">{</span>
+  <span class="co">// ... do something</span>
+<span class="op">}</span>)<span class="op">;</span></code></pre></div>
+<p>Of course the correct way would be:</p>
+<div class="sourceCode"><pre class="sourceCode js"><code class="sourceCode javascript"><span class="kw">const</span> fsp <span class="op">=</span> <span class="at">require</span>(<span class="st">'fs-promise'</span>)<span class="op">;</span>
+
+<span class="va">fsp</span>.<span class="at">stat</span>(<span class="st">'/etc/passwd'</span>)
+.<span class="at">then</span>(stat <span class="op">=&gt;</span> <span class="op">{</span>
+  <span class="co">// ... do something</span>
+<span class="op">}</span>)
+.<span class="at">catch</span>(<span class="va">console</span>.<span class="at">error</span>)<span class="op">;</span></code></pre></div>
+<p>It requires a bit of extra self-discipline. Working with promises is less intuitive than it should be. It requires more mental effort to remember to handle all those errors. Node solves this problem in a simple and beautiful way. Just put error as the first argument. That way it’s almost impossible to miss it.</p>
+<p>I’m not the first one pointing this out. Pretty much every guide or tutorial about promises talks about this common mistake.</p>
+<p>It’s one thing to just read about something and another when things don’t work as you would expect. When struggling with a program is not working although there’s no clue why not.</p>
+<p>That’s one of the advantages of direct experience with any technology. You ingrain those common mistakes into your practice. They will become the problem of a past.</p>
+		</section>
+
+		<footer id="post-meta" class="clearfix">
+      <hr />
+      <div class="uk-grid">
+        <p class="uk-article-meta uk-width-1-2">
+          <span>Posted on</span> February 14
+        </p>
+
+        <p class="uk-article-meta uk-width-1-2 uk-text-right">
+          <span>Written by</span> Łukasz Czyżykowski
+        </p>
+      </div>
+
+      <div class="uk-text-center">
+        <a class="uk-icon-button" href="https://twitter.com/share">
+          <img src="../images/twitter.svg" width="16" height="16" alt="twitter icon" />
+        </a>
+
+        <a class="uk-icon-button" href="#" onclick="
+            window.open(
+              'https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(location.href),
+              'facebook-share-dialog',
+              'width=626,height=436');
+            return false;">
+
+          <img src="../images/facebook.svg" width="16" height="16" alt="facebook icon" />
+        </a>
+      </div>
+		</footer>
+	</article>
+
+</section>
+
+
+        </div>
+
+        <script>
+          if (window.location.hostname === 'czyzykowski.com') {
+            (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+            })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+            ga('create', 'UA-4012543-11', 'auto');
+            ga('send', 'pageview');
+          }
+        </script>
+    </body>
+</html>

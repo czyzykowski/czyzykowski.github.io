@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>czyzykowski.com - Modifying production database</title>
+
+        <link rel="shortcut icon" href="../images/favicon.ico">
+        <link rel="stylesheet" href="../css/uikit.min.css">
+        <link rel="stylesheet" href="../css/syntax.css">
+    </head>
+    <body>
+        <div class="uk-container uk-width-xxlarge">
+            <hr class="uk-margin-xlarge-top" />
+            <nav class="uk-position-small uk-position-fixed uk-position-right">
+                
+                  <a class="uk-margin-right" href="../">Home</a>
+                
+                <a class="uk-margin-right" href="../about.html">About</a>
+                <a class="uk-margin-right" href="https://twitter.com/czyzykowski">Twitter</a>
+            </nav>
+
+            <article class="uk-article">
+
+    <h1 class="uk-article-title">Modifying production database</h1>
+    
+        <p class="uk-text-lead uk-text-muted">Switching autocommit makes it less risky</p>
+    
+
+		<section id="post-body">
+            <h2 id="problem">Problem</h2>
+<p>Although not often, I would find myself modifying production database. Either because there was a crisis which had to be handled immediately or because there was a business need. Each time going with the established process would take too long for time critical task.</p>
+<p>When doing those modifications I had never made a mistake, but several times I got close. I found myself stopping at the last moment before issuing a disastrous command. Recovering data from the backup would be a really bad way of spending my time.</p>
+<p>I was determined to make the chance of me making a mistake as low as possible.</p>
+<h2 id="solution">Solution</h2>
+<p>I came up with a process wich (so far) prevented me from corrupting anything in the production database.</p>
+<p>The process consists of 4 steps:</p>
+<ol style="list-style-type: decimal">
+<li>write a query which will confirm the desired changes and run it, this should show that the change is not yet there,</li>
+<li>modify the database,</li>
+<li>re-run query from the step 1 to confirm that the desired change had happened,</li>
+<li>commit your changes</li>
+</ol>
+<p>To help with the last step I have following bit in my <code>~/.psqlrc</code> file:</p>
+<pre><code>\set AUTOCOMMIT off</code></pre>
+<p>This bit forces me to explicitly commit after any changes. Without it, quitting <code>psql</code> or any connection problems will rollback any modifications. It’s something which, in my mind should be the default.</p>
+<h2 id="summary">Summary</h2>
+<p>Editing production database should be avoided as much as possible. In case that it cannot be, the best approach is to have a reliable and repeatable process minimizing the risk of breaking things. In the case of <code>psql</code> switching <code>autocommit</code> helps by forcing an extra step when applying any modifications. This extra step gives a chance to review any changes before applying them to the data.</p>
+		</section>
+
+		<footer id="post-meta" class="clearfix">
+      <hr />
+      <div class="uk-grid">
+        <p class="uk-article-meta uk-width-1-2">
+          <span>Posted on</span> March 23
+        </p>
+
+        <p class="uk-article-meta uk-width-1-2 uk-text-right">
+          <span>Written by</span> Łukasz Czyżykowski
+        </p>
+      </div>
+
+      <div class="uk-text-center">
+        <a class="uk-icon-button" href="https://twitter.com/share">
+          <img src="../images/twitter.svg" width="16" height="16" alt="twitter icon" />
+        </a>
+
+        <a class="uk-icon-button" href="#" onclick="
+            window.open(
+              'https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(location.href),
+              'facebook-share-dialog',
+              'width=626,height=436');
+            return false;">
+
+          <img src="../images/facebook.svg" width="16" height="16" alt="facebook icon" />
+        </a>
+      </div>
+		</footer>
+	</article>
+
+</section>
+
+
+        </div>
+
+        <script>
+          if (window.location.hostname === 'czyzykowski.com') {
+            (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+            })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+            ga('create', 'UA-4012543-11', 'auto');
+            ga('send', 'pageview');
+          }
+        </script>
+    </body>
+</html>

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>czyzykowski.com - Processing big files in Node.js</title>
+
+        <link rel="shortcut icon" href="../images/favicon.ico">
+        <link rel="stylesheet" href="../css/uikit.min.css">
+        <link rel="stylesheet" href="../css/syntax.css">
+    </head>
+    <body>
+        <div class="uk-container uk-width-xxlarge">
+            <hr class="uk-margin-xlarge-top" />
+            <nav class="uk-position-small uk-position-fixed uk-position-right">
+                
+                  <a class="uk-margin-right" href="../">Home</a>
+                
+                <a class="uk-margin-right" href="../about.html">About</a>
+                <a class="uk-margin-right" href="https://twitter.com/czyzykowski">Twitter</a>
+            </nav>
+
+            <article class="uk-article">
+
+    <h1 class="uk-article-title">Processing big files in Node.js</h1>
+    
+        <p class="uk-text-lead uk-text-muted">Finding the right tool for the job</p>
+    
+
+		<section id="post-body">
+            <h2 id="the-problem-of-big-files">The problem of big files</h2>
+<p>Recently I had something which seemed to be quite a simple task, regular file processing. The job required transforming each line of a file into a request to an external system. Each line was encoded as a JSON object, so no complicated parsing was involved.</p>
+<p>Processing each line from a file seems to be a simple problem to solve in Node.js. I thought that the following bit of code will take care of that:</p>
+<div class="sourceCode"><pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">const</span> fs <span class="op">=</span> <span class="at">require</span>(<span class="st">'fs'</span>)<span class="op">;</span>
+
+<span class="va">fs</span>.<span class="at">readFile</span>(<span class="st">'file.txt'</span><span class="op">,</span> <span class="st">'utf8'</span><span class="op">,</span> (err<span class="op">,</span> data) <span class="op">=&gt;</span> <span class="op">{</span>
+  <span class="cf">if</span> (err) <span class="op">{</span>
+    <span class="cf">throw</span> err<span class="op">;</span>
+  <span class="op">}</span>
+  <span class="va">data</span>.<span class="at">split</span>(<span class="st">'</span><span class="sc">\n</span><span class="st">'</span>).<span class="at">forEach</span>(line <span class="op">=&gt;</span> <span class="op">{</span>
+    <span class="kw">const</span> obj <span class="op">=</span> <span class="va">JSON</span>.<span class="at">parse</span>(line)<span class="op">;</span>
+    <span class="co">/* ... */</span>
+  <span class="op">}</span>)
+<span class="op">}</span>)<span class="op">;</span></code></pre></div>
+<p>It works great unless you are trying to process a file which is too big (where exactly lies the limit and what is causing it I wasn’t able to investigate). In my case, it failed on 930MB <a href="http://jsonlines.org/">JSONL</a> file. The following exception:</p>
+<pre><code>buffer.js:378
+    throw new Error('toString failed');
+    ^
+
+Error: toString failed
+    at Buffer.toString (buffer.js:378:11)
+    at Object.fs.readFileSync (fs.js:496:33)
+    at Object.&lt;anonymous&gt; (test.js:2:17)
+    at Module._compile (module.js:425:26)
+    at Object.Module._extensions..js (module.js:432:10)
+    at Module.load (module.js:356:32)
+    at Function.Module._load (module.js:313:12)
+    at Function.Module.runMain (module.js:457:10)
+    at startup (node.js:138:18)
+    at node.js:974:3</code></pre>
+<p>wasn’t too helpful. When digging around I figured out that the problem happened because of the failed conversion from the Node’s buffer object into a string. Node.js tried to do that because the call <code>readFile</code> specified the encoding. That meant that it had to convert the whole content of the file into a string. For some reason, it was failing. The memory couldn’t be an issue because my machine has plenty of it although it could be that the Node.js process is in some way restricted to not consume all of it.</p>
+<p>That exception meant that I had to look into other ways of solving my problem.</p>
+<p>I knew that I could read parts of the buffer returned from <code>readFile</code> and encode that into UTF-8. Then manually look for the new line marker and glue those lines together. It’s not too complicated piece of code but I was sure that I wasn’t the first person having to write it.</p>
+<p>As it turns out in Node, there’s more than one solution to that problem.</p>
+<h3 id="node-lines-adapter"><code>node-lines-adapter</code></h3>
+<p>First was the package called <a href="https://www.npmjs.com/package/lines-adapter">node-lines-adapter</a>. It converts any stream of data into one which emits whole lines.</p>
+<div class="sourceCode"><pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">const</span> fs <span class="op">=</span> <span class="at">require</span>(<span class="st">'fs'</span>)<span class="op">;</span>
+<span class="kw">const</span> lines <span class="op">=</span> <span class="at">require</span>(<span class="st">'lines-adapter'</span>)<span class="op">;</span>
+
+<span class="kw">const</span> stream <span class="op">=</span> <span class="va">fs</span>.<span class="at">createReadStream</span>(<span class="st">'events.jsonl'</span>)<span class="op">;</span>
+<span class="at">lines</span>(stream<span class="op">,</span> <span class="st">'utf8'</span>)
+.<span class="at">on</span>(<span class="st">'data'</span><span class="op">,</span> line <span class="op">=&gt;</span> <span class="op">{</span>
+  <span class="kw">const</span> obj <span class="op">=</span> <span class="va">JSON</span>.<span class="at">parse</span>(line)<span class="op">;</span>
+  <span class="co">/* line processing */</span>
+<span class="op">}</span>).<span class="at">on</span>(<span class="st">'end'</span><span class="op">,</span> () <span class="op">=&gt;</span> <span class="op">{</span>
+  <span class="co">/* cleanup */</span>
+<span class="op">}</span>)<span class="op">;</span></code></pre></div>
+<p>The code is concise and readable. I could finish there, but the <a href="https://github.com/tomjnixon/node-lines-adapter#similar-packages">github page</a> for the <code>node-lines-adapter</code> mentions another package to try out, called <a href="https://www.npmjs.com/package/lazy">node-lazy</a></p>
+<h3 id="node-lazy"><code>node-lazy</code></h3>
+<p>The following code looks very similar to the one using the previous package.</p>
+<div class="sourceCode"><pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">const</span> fs <span class="op">=</span> <span class="at">require</span>(<span class="st">'fs'</span>)<span class="op">;</span>
+<span class="kw">const</span> lazy <span class="op">=</span> <span class="at">require</span>(<span class="st">'lazy'</span>)<span class="op">;</span>
+
+<span class="kw">const</span> stream <span class="op">=</span> <span class="va">fs</span>.<span class="at">createReadStream</span>(<span class="st">'events.jsonl'</span>)<span class="op">;</span>
+<span class="at">lazy</span>(stream)
+.<span class="at">lines</span>
+.<span class="at">map</span>(<span class="va">JSON</span>.<span class="at">parse</span>)
+.<span class="at">forEach</span>(obj <span class="op">=&gt;</span> <span class="op">{</span>
+  <span class="co">/* line processing */</span>
+<span class="op">}</span>)<span class="op">;</span></code></pre></div>
+<p>The advantage which <code>node-lazy</code> has over <code>node-lines-adapter</code> is the rich set of methods used for interacting with the stream of lines. In solving my problem things like <code>.skip()</code> and <code>.take()</code> turned out to be very useful.</p>
+<h2 id="summary">Summary</h2>
+<p>Processing a big file in Node.js is certainly doable and there are ready made solutions which can help with that task. Both tested libraries are doing what they advertise to do. My decision to choose <code>node-lazy</code> over <code>node-lines-adapter</code> was dictated by the richer set of tools provided out of the box. That way I didn’t have to build them myself.</p>
+		</section>
+
+		<footer id="post-meta" class="clearfix">
+      <hr />
+      <div class="uk-grid">
+        <p class="uk-article-meta uk-width-1-2">
+          <span>Posted on</span> June  4
+        </p>
+
+        <p class="uk-article-meta uk-width-1-2 uk-text-right">
+          <span>Written by</span> Łukasz Czyżykowski
+        </p>
+      </div>
+
+      <div class="uk-text-center">
+        <a class="uk-icon-button" href="https://twitter.com/share">
+          <img src="../images/twitter.svg" width="16" height="16" alt="twitter icon" />
+        </a>
+
+        <a class="uk-icon-button" href="#" onclick="
+            window.open(
+              'https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(location.href),
+              'facebook-share-dialog',
+              'width=626,height=436');
+            return false;">
+
+          <img src="../images/facebook.svg" width="16" height="16" alt="facebook icon" />
+        </a>
+      </div>
+		</footer>
+	</article>
+
+</section>
+
+
+        </div>
+
+        <script>
+          if (window.location.hostname === 'czyzykowski.com') {
+            (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+            })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+            ga('create', 'UA-4012543-11', 'auto');
+            ga('send', 'pageview');
+          }
+        </script>
+    </body>
+</html>

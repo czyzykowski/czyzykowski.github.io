@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>czyzykowski.com - Mocha, promises and testing rejections</title>
+
+        <link rel="shortcut icon" href="../images/favicon.ico">
+        <link rel="stylesheet" href="../css/uikit.min.css">
+        <link rel="stylesheet" href="../css/syntax.css">
+    </head>
+    <body>
+        <div class="uk-container uk-width-xxlarge">
+            <hr class="uk-margin-xlarge-top" />
+            <nav class="uk-position-small uk-position-fixed uk-position-right">
+                
+                  <a class="uk-margin-right" href="../">Home</a>
+                
+                <a class="uk-margin-right" href="../about.html">About</a>
+                <a class="uk-margin-right" href="https://twitter.com/czyzykowski">Twitter</a>
+            </nav>
+
+            <article class="uk-article">
+
+    <h1 class="uk-article-title">Mocha, promises and testing rejections</h1>
+    
+        <p class="uk-text-lead uk-text-muted">How to test Promise.reject()</p>
+    
+
+		<section id="post-body">
+            <p>Mocha is a great testing framework for Node.js. It supports everything you need to be able to exercise your code.</p>
+<p>In other languages testing asynchronous code is usually quite problematic. Either you need to depend on fragile delays or setup complicated harness. Sometimes you just give up and test your code in non-asynchronous environment.</p>
+<p>Not in Mocha.</p>
+<p>It has asynchronous code testing built in. It’s not a surprise. It would be quite hard to imagine a JavaScript testing framework without it.</p>
+<p>Of course, support for promises is also built in. The only thing you need to do is to return them from your test case and the framework will handle the rest.</p>
+<p>Testing promise rejection is not that intuitive. The culprit is the way in which promises and assertions interact with each other. To explain that look at the code below:</p>
+<div class="sourceCode"><pre class="sourceCode js"><code class="sourceCode javascript"><span class="at">it</span>(<span class="st">'returns rejected promise'</span><span class="op">,</span> () <span class="op">=&gt;</span> <span class="op">{</span>
+  <span class="cf">return</span> <span class="at">something</span>()
+  .<span class="at">then</span>(() <span class="op">=&gt;</span> <span class="at">assert</span>(<span class="kw">false</span>))
+  .<span class="at">catch</span>(() <span class="op">=&gt;</span> <span class="at">assert</span>(<span class="kw">true</span>))<span class="op">;</span>
+<span class="op">}</span>)<span class="op">;</span></code></pre></div>
+<p>It looks reasonable. As a matter of fact, if <code>something()</code> returns rejected promise it will pass.</p>
+<p>But what will happen if <code>something()</code> returns resolved promise?</p>
+<p>It would seem that it should hit <code>assert(false)</code> and report a test failure. Unfortunately, that’s not what is going to happen.</p>
+<p>First, as expected, it does reach <code>assert(false)</code>. Then instead of reporting an error the exception from <code>assert</code> the following <code>.catch()</code> takes over it and because it contains <code>assert(true)</code> it passes. From the point of view of the test framework, everything is OK.</p>
+<p>There’s one simple solution. Something which most of the tutorials and guides about promises tell you not to do. It’s to add the rejection handler as the second argument to <code>.then()</code>.</p>
+<div class="sourceCode"><pre class="sourceCode js"><code class="sourceCode javascript"><span class="at">it</span>(<span class="st">'returns rejected promise'</span><span class="op">,</span> () <span class="op">=&gt;</span> <span class="op">{</span>
+  <span class="cf">return</span> <span class="at">something</span>()
+  .<span class="at">then</span>(() <span class="op">=&gt;</span> <span class="at">assert</span>(<span class="kw">false</span>)<span class="op">,</span> () <span class="op">=&gt;</span> <span class="at">assert</span>(<span class="kw">true</span>))<span class="op">;</span>
+<span class="op">}</span>)<span class="op">;</span></code></pre></div>
+<p>That way any exception from the first function will bubble up. It will be visible to Mocha and will report it as a test failure.</p>
+<p>As I mentioned <a href="../posts/one-problem-with-promises.html">before</a> the proper error handling when using promises is tricky. One needs to be extra careful when dealing with it.</p>
+<p>One piece of advice which did help me a lot is to always make sure you can see your test case failing. Otherwise, you may have a bit of test code which will give you a false sense of security.</p>
+		</section>
+
+		<footer id="post-meta" class="clearfix">
+      <hr />
+      <div class="uk-grid">
+        <p class="uk-article-meta uk-width-1-2">
+          <span>Posted on</span> February 15
+        </p>
+
+        <p class="uk-article-meta uk-width-1-2 uk-text-right">
+          <span>Written by</span> Łukasz Czyżykowski
+        </p>
+      </div>
+
+      <div class="uk-text-center">
+        <a class="uk-icon-button" href="https://twitter.com/share">
+          <img src="../images/twitter.svg" width="16" height="16" alt="twitter icon" />
+        </a>
+
+        <a class="uk-icon-button" href="#" onclick="
+            window.open(
+              'https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(location.href),
+              'facebook-share-dialog',
+              'width=626,height=436');
+            return false;">
+
+          <img src="../images/facebook.svg" width="16" height="16" alt="facebook icon" />
+        </a>
+      </div>
+		</footer>
+	</article>
+
+</section>
+
+
+        </div>
+
+        <script>
+          if (window.location.hostname === 'czyzykowski.com') {
+            (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+            })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+            ga('create', 'UA-4012543-11', 'auto');
+            ga('send', 'pageview');
+          }
+        </script>
+    </body>
+</html>

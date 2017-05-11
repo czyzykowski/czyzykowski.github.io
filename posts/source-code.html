@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>czyzykowski.com - The source code</title>
+
+        <link rel="shortcut icon" href="../images/favicon.ico">
+        <link rel="stylesheet" href="../css/uikit.min.css">
+        <link rel="stylesheet" href="../css/syntax.css">
+    </head>
+    <body>
+        <div class="uk-container uk-width-xxlarge">
+            <hr class="uk-margin-xlarge-top" />
+            <nav class="uk-position-small uk-position-fixed uk-position-right">
+                
+                  <a class="uk-margin-right" href="../">Home</a>
+                
+                <a class="uk-margin-right" href="../about.html">About</a>
+                <a class="uk-margin-right" href="https://twitter.com/czyzykowski">Twitter</a>
+            </nav>
+
+            <article class="uk-article">
+
+    <h1 class="uk-article-title">The source code</h1>
+    
+        <p class="uk-text-lead uk-text-muted">Learning from reading source code</p>
+    
+
+		<section id="post-body">
+            <p>One of the best ways to get better at programming is to read other people’s code. Fortunately, with our day and age, that’s easy to do. There’s a proliferation of open source code and it’s very easy to find high-quality examples to study.</p>
+<p>There are three things one can learn about when reading source code, especially of the libraries and frameworks one uses in day to day work:</p>
+<ul>
+<li>learning about language idioms,</li>
+<li>learning about novel approaches to solving problems,</li>
+<li>learning the internals of libraries and frameworks</li>
+</ul>
+<h2 id="idioms">Idioms</h2>
+<p>Each language has it’s own way to express common solutions. Usually, they are in a form of small snippets of code. Those are immediately recognizable. They form a higher level language with which it’s easier to express the solutions.</p>
+<p>Those idioms could be a shorter way of expressing a solution or the one in which it will be more efficient. Generally, those form a part of the culture around the language.</p>
+<p>Knowledge of those idioms not only helps with coding quicker and with less chance of errors but also makes it easier for others to read the code. That other person maybe you in couple months.</p>
+<p>Learning those idioms is part of learning the language’s culture and the best way to acquire them quickly is to go through the high-quality code.</p>
+<h2 id="problem-solving">Problem-solving</h2>
+<p>Programming is all about solving problems. The wider array of the approaches one have the better it is to find an approach which will be the best fit.</p>
+<p>Existing code, which survived long term usage and scrutiny of many people will contain a lot of battle-tested solutions. Those solutions may be extracted and generalized. And even if they are very specific to the given piece of code one can learn how to tackle such problem. It’s gaining experience without the struggle to arrive at the solution. A shortcut to becoming a better programmer.</p>
+<p>We are lucky that we can study how the best of us build great code. Studying craft of other programmers is what helps to improve.</p>
+<p>Most of the time we can even look into the past, follow how given a piece of the code come to be, how it evolved and become what it is now. Maybe bugs were fixed, maybe new requirements showed up. Usually, that can be traced, thanks to the source control systems.</p>
+<h2 id="internals">Internals</h2>
+<p>Another benefit of reading source code, especially for libraries one uses in day to day work is learning about their internals.</p>
+<p>In the perfect world, one wouldn’t have to look under the hood to know how things work. The documentation would explain everything required for efficient library usage and also describe how it works. It would be in sufficient level of details so one would be equipped to make the best use of it.</p>
+<p>Unfortunately, that’s rarely the case and to master given piece of technology, it’s often required to reach to the source.</p>
+<p>Even for well-documented libraries, there are usually pieces not yet documented. Also there you can witness exactly how the library works internally which may help with optimizing the code around that knowledge.</p>
+<p>The danger of doing that is too tight coupling to the implementation details. The internal structure of a library may change with the future versions and the optimization may no longer work as expected. Too tight coupling should be avoided when possible.</p>
+<h2 id="summary">Summary</h2>
+<p>Reading good quality source code has many benefits and one should find time to do it regularly. It can only help to become better at the craft of programming.</p>
+		</section>
+
+		<footer id="post-meta" class="clearfix">
+      <hr />
+      <div class="uk-grid">
+        <p class="uk-article-meta uk-width-1-2">
+          <span>Posted on</span> March 16
+        </p>
+
+        <p class="uk-article-meta uk-width-1-2 uk-text-right">
+          <span>Written by</span> Łukasz Czyżykowski
+        </p>
+      </div>
+
+      <div class="uk-text-center">
+        <a class="uk-icon-button" href="https://twitter.com/share">
+          <img src="../images/twitter.svg" width="16" height="16" alt="twitter icon" />
+        </a>
+
+        <a class="uk-icon-button" href="#" onclick="
+            window.open(
+              'https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(location.href),
+              'facebook-share-dialog',
+              'width=626,height=436');
+            return false;">
+
+          <img src="../images/facebook.svg" width="16" height="16" alt="facebook icon" />
+        </a>
+      </div>
+		</footer>
+	</article>
+
+</section>
+
+
+        </div>
+
+        <script>
+          if (window.location.hostname === 'czyzykowski.com') {
+            (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+            })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+            ga('create', 'UA-4012543-11', 'auto');
+            ga('send', 'pageview');
+          }
+        </script>
+    </body>
+</html>

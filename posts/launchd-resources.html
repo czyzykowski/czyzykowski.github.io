@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>czyzykowski.com - launchd resources</title>
+
+        <link rel="shortcut icon" href="../images/favicon.ico">
+        <link rel="stylesheet" href="../css/uikit.min.css">
+        <link rel="stylesheet" href="../css/syntax.css">
+    </head>
+    <body>
+        <div class="uk-container uk-width-xxlarge">
+            <hr class="uk-margin-xlarge-top" />
+            <nav class="uk-position-small uk-position-fixed uk-position-right">
+                
+                  <a class="uk-margin-right" href="../">Home</a>
+                
+                <a class="uk-margin-right" href="../about.html">About</a>
+                <a class="uk-margin-right" href="https://twitter.com/czyzykowski">Twitter</a>
+            </nav>
+
+            <article class="uk-article">
+
+    <h1 class="uk-article-title">launchd resources</h1>
+    
+        <p class="uk-text-lead uk-text-muted">Where to find more information</p>
+    
+
+		<section id="post-body">
+            <p>Although launchd is a critical part of Mac OS X there’s not a lot of resources about it. Below is the list of all that I could find (and which was useful) when creating my first service.</p>
+<h2 id="launchd-tutorial">launchd tutorial</h2>
+<p>The page which I found the most helpful when starting with launchd is called <a href="http://launchd.info/">“A launchd tutorial”</a>. Its five sections provide a straightforward guide mentioning everything which is required to properly implement a working service.</p>
+<p>A note: it does try to sell you on the piece of software which helps with creating launchd services. Nonetheless, the information provided is complete and the program is totally optional.</p>
+<h2 id="man-pages">man pages</h2>
+<p>The canonical source for the knowledge how launchd works and how to implement services with it.</p>
+<p><a href="https://developer.apple.com/library/mac/documentation/Darwin/Reference/ManPages/man8/launchd.8.html">launchd(8)</a> is the main entry point, but to reach any practical details one needs to venture to other places. For the list of commands and day to day operations <a href="https://developer.apple.com/library/mac/documentation/Darwin/Reference/ManPages/man1/launchctl.1.html">launchctl(1)</a> is the most valuable place. As for the service description files, the <a href="https://developer.apple.com/library/mac/documentation/Darwin/Reference/ManPages/man5/launchd.plist.5.html">launchd.plist(5)</a> is the right source.</p>
+<h2 id="the-source-code">The source code</h2>
+<p>As with every open source software, the ultimate source of knowledge is with the source code. Fortunately, <a href="https://opensource.apple.com/source/launchd/">launchd’s code</a> is up for anyone to see and study. In my limited experience, I didn’t have to reach for it, but I feel safer knowing that I can.</p>
+<h2 id="wikipedia-entry">Wikipedia entry</h2>
+<p><a href="https://en.wikipedia.org/wiki/Launchd">Wikipedia article</a> provides historical background which is missing from the rest of the resources on launchd. Although not strictly necessary to use a given piece of technology, knowing about the context in which it was created and any historical background can help to understand it better.</p>
+<h2 id="video">Video</h2>
+<p>There’s also <a href="https://www.youtube.com/watch?v=cD_s6Fjdri8">rather an old video</a> (from 2007) of a talk which the author gave for Google (imported from old Google Video site, if anyone still remembers that service).</p>
+<iframe width="520" height="390" src="https://www.youtube-nocookie.com/embed/cD_s6Fjdri8?rel=0&amp;controls=0&amp;showinfo=0" frameborder="0" allowfullscreen>
+</iframe>
+<p>The video doesn’t add much to the information contained in the resources above.</p>
+<p>Nonetheless, it is an interesting watch, where one can see the author of a piece of software explain it to others.</p>
+<p>YouTube contains <a href="https://www.youtube.com/results?search_query=launchd">more videos</a> on the topic of launchd. I didn’t watch any of them so I can’t comment on the information contained in them.</p>
+		</section>
+
+		<footer id="post-meta" class="clearfix">
+      <hr />
+      <div class="uk-grid">
+        <p class="uk-article-meta uk-width-1-2">
+          <span>Posted on</span> March 14
+        </p>
+
+        <p class="uk-article-meta uk-width-1-2 uk-text-right">
+          <span>Written by</span> Łukasz Czyżykowski
+        </p>
+      </div>
+
+      <div class="uk-text-center">
+        <a class="uk-icon-button" href="https://twitter.com/share">
+          <img src="../images/twitter.svg" width="16" height="16" alt="twitter icon" />
+        </a>
+
+        <a class="uk-icon-button" href="#" onclick="
+            window.open(
+              'https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(location.href),
+              'facebook-share-dialog',
+              'width=626,height=436');
+            return false;">
+
+          <img src="../images/facebook.svg" width="16" height="16" alt="facebook icon" />
+        </a>
+      </div>
+		</footer>
+	</article>
+
+</section>
+
+
+        </div>
+
+        <script>
+          if (window.location.hostname === 'czyzykowski.com') {
+            (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+            })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+            ga('create', 'UA-4012543-11', 'auto');
+            ga('send', 'pageview');
+          }
+        </script>
+    </body>
+</html>

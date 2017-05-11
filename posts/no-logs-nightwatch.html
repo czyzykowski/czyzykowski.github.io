@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>czyzykowski.com - No logs assertion for Nightwatch</title>
+
+        <link rel="shortcut icon" href="../images/favicon.ico">
+        <link rel="stylesheet" href="../css/uikit.min.css">
+        <link rel="stylesheet" href="../css/syntax.css">
+    </head>
+    <body>
+        <div class="uk-container uk-width-xxlarge">
+            <hr class="uk-margin-xlarge-top" />
+            <nav class="uk-position-small uk-position-fixed uk-position-right">
+                
+                  <a class="uk-margin-right" href="../">Home</a>
+                
+                <a class="uk-margin-right" href="../about.html">About</a>
+                <a class="uk-margin-right" href="https://twitter.com/czyzykowski">Twitter</a>
+            </nav>
+
+            <article class="uk-article">
+
+    <h1 class="uk-article-title">No logs assertion for Nightwatch</h1>
+    
+        <p class="uk-text-lead uk-text-muted">Ensure React's PropTypes are respected</p>
+    
+
+		<section id="post-body">
+            <p>React’s <a href="https://facebook.github.io/react/docs/reusable-components.html#prop-validation">property types</a> are very helpful in ensuring good code quality.</p>
+<p>One drawback of using <code>PropTypes</code> is that any violation is only reported to the console, as an error message.</p>
+<p>It is too easy to change the code in one place which will break the property requirements in another. That breaking change can go unnoticed. The only way to notice it is to go through the application with the open console.</p>
+<p>If you happen to use automated testing (which you should) it’s easy to add code to check for this problem.</p>
+<p>I’m using <a href="http://nightwatchjs.org/">nightwatch</a> and I created small custom assertion which will fail if there were any console messages.</p>
+<p>Thanks to <a href="http://ramdajs.com/">Ramda</a> code is very concise.</p>
+<div class="sourceCode"><pre class="sourceCode js"><code class="sourceCode javascript"><span class="co">// content of noConsoleLogs.js file</span>
+<span class="kw">const</span> R <span class="op">=</span> <span class="at">require</span>(<span class="st">'ramda'</span>)<span class="op">;</span>
+
+<span class="va">exports</span>.<span class="at">assertion</span> <span class="op">=</span> <span class="kw">function</span> () <span class="op">{</span>
+  <span class="kw">this</span>.<span class="at">message</span> <span class="op">=</span> <span class="st">'Testing if any console errors are present'</span><span class="op">;</span>
+  <span class="kw">this</span>.<span class="at">expected</span> <span class="op">=</span> <span class="st">''</span><span class="op">;</span>
+  <span class="kw">this</span>.<span class="at">pass</span> <span class="op">=</span> <span class="va">R</span>.<span class="at">not</span><span class="op">;</span>
+  <span class="kw">this</span>.<span class="at">value</span> <span class="op">=</span> <span class="va">R</span>.<span class="at">compose</span>(<span class="va">R</span>.<span class="at">join</span>(<span class="st">'</span><span class="sc">\n</span><span class="st">'</span>)<span class="op">,</span> <span class="va">R</span>.<span class="at">map</span>(<span class="va">R</span>.<span class="at">prop</span>(<span class="st">'message'</span>)))<span class="op">;</span>
+  <span class="kw">this</span>.<span class="at">command</span> <span class="op">=</span> callback <span class="op">=&gt;</span> <span class="kw">this</span>.<span class="va">api</span>.<span class="at">getLog</span>(<span class="st">'browser'</span><span class="op">,</span> callback)<span class="op">;</span>
+<span class="op">};</span></code></pre></div>
+<p><code>this.message</code> is the message printed to the console when this assertion is running.</p>
+<p><code>this.expected</code> is the value which needs to match what’s being returned from <code>this.value</code> for the assertion to pass. In this case, it’s an empty string which means we are expecting no messages.</p>
+<p><code>this.pass</code> is the method which determines if the assertion passed or not. Simply using <code>R.not</code> means only empty string will pass, everything else will cause the assertion to fail.</p>
+<p><code>this.value</code> extract the assertion value from the result of <code>this.command</code>. What it does is for all messages extract <code>message</code> property. Then it joins them with the newline as a separator. This gives readable output as each message will be on its own line (proceeded by script and line number when the message originated).</p>
+<p>Finally <code>this.command</code> is the Nightwatch’s command to actually get log messages from the browser.</p>
+<p>To use it’s just a matter of putting the assertion near the end of test case:</p>
+<div class="sourceCode"><pre class="sourceCode js"><code class="sourceCode javascript"><span class="va">module</span>.<span class="at">exports</span> <span class="op">=</span> <span class="op">{</span>
+  <span class="st">'Basic test'</span><span class="op">:</span> browser <span class="op">=&gt;</span> <span class="op">{</span>
+    browser
+      .<span class="at">url</span>(<span class="st">'http://example.com'</span>)
+      .<span class="at">waitForElementVisible</span>(<span class="st">'#profile'</span><span class="op">,</span> <span class="dv">1000</span>)
+      .<span class="at">click</span>(<span class="st">'#profile'</span>)
+      .<span class="va">assert</span>.<span class="at">noConsoleLogs</span>()
+      .<span class="at">end</span>()<span class="op">;</span>
+  <span class="op">}</span>
+<span class="op">};</span></code></pre></div>
+<p>This piece of code already saved me from breaking changes and I know it will continue doing so in the future.</p>
+		</section>
+
+		<footer id="post-meta" class="clearfix">
+      <hr />
+      <div class="uk-grid">
+        <p class="uk-article-meta uk-width-1-2">
+          <span>Posted on</span> March  5
+        </p>
+
+        <p class="uk-article-meta uk-width-1-2 uk-text-right">
+          <span>Written by</span> Łukasz Czyżykowski
+        </p>
+      </div>
+
+      <div class="uk-text-center">
+        <a class="uk-icon-button" href="https://twitter.com/share">
+          <img src="../images/twitter.svg" width="16" height="16" alt="twitter icon" />
+        </a>
+
+        <a class="uk-icon-button" href="#" onclick="
+            window.open(
+              'https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(location.href),
+              'facebook-share-dialog',
+              'width=626,height=436');
+            return false;">
+
+          <img src="../images/facebook.svg" width="16" height="16" alt="facebook icon" />
+        </a>
+      </div>
+		</footer>
+	</article>
+
+</section>
+
+
+        </div>
+
+        <script>
+          if (window.location.hostname === 'czyzykowski.com') {
+            (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+            })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+            ga('create', 'UA-4012543-11', 'auto');
+            ga('send', 'pageview');
+          }
+        </script>
+    </body>
+</html>

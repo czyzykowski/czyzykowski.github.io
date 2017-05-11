@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>czyzykowski.com - 7 Ramda recipes</title>
+
+        <link rel="shortcut icon" href="../images/favicon.ico">
+        <link rel="stylesheet" href="../css/uikit.min.css">
+        <link rel="stylesheet" href="../css/syntax.css">
+    </head>
+    <body>
+        <div class="uk-container uk-width-xxlarge">
+            <hr class="uk-margin-xlarge-top" />
+            <nav class="uk-position-small uk-position-fixed uk-position-right">
+                
+                  <a class="uk-margin-right" href="../">Home</a>
+                
+                <a class="uk-margin-right" href="../about.html">About</a>
+                <a class="uk-margin-right" href="https://twitter.com/czyzykowski">Twitter</a>
+            </nav>
+
+            <article class="uk-article">
+
+    <h1 class="uk-article-title">7 Ramda recipes</h1>
+    
+        <p class="uk-text-lead uk-text-muted">Useful function combinations</p>
+    
+
+		<section id="post-body">
+            <p>When working on a new project where I use <a href="http://ramdajs.com/">Ramda</a> I find myself creating a bunch of simple function which helps me better express my intent. Usually, those functions are a just simple combination of two or three of basic blocks provided in Ramda. Below is my top 7.</p>
+<h2 id="contained">contained</h2>
+<p>Ramada provides useful function <code>contains</code> which abstracts common JavaScript pattern of <code>haystack.indexOf(needle) !== -1</code>. I find myself that I often need to switch the arguments order. That way I can build a function checking if given item belongs to a set of valid set of values.</p>
+<h3 id="code">Code</h3>
+<div class="sourceCode"><pre class="sourceCode js"><code class="sourceCode javascript"><span class="kw">const</span> contained <span class="op">=</span> <span class="at">flip</span>(contains)<span class="op">;</span></code></pre></div>
+<h3 id="example">Example</h3>
+<div class="sourceCode"><pre class="sourceCode js"><code class="sourceCode javascript"><span class="kw">const</span> validResponse <span class="op">=</span> <span class="at">contained</span>([<span class="st">'success'</span><span class="op">,</span> <span class="st">'failure'</span>])<span class="op">;</span>
+
+<span class="cf">if</span> (<span class="at">validResponse</span>(response)) <span class="op">{</span>
+  <span class="co">// ...</span>
+<span class="op">}</span></code></pre></div>
+<h2 id="filtert">filterT</h2>
+<p>Ramda’s <code>filter</code> function expects two arguments. First, one is predicate and second a list of values. I find myself often checking if the list contains only truthful values, which can be simplified by creating function I call <code>filterT</code> (filter all Truth values).</p>
+<h3 id="code-1">Code</h3>
+<div class="sourceCode"><pre class="sourceCode js"><code class="sourceCode javascript"><span class="kw">const</span> filterT <span class="op">=</span> <span class="at">filter</span>(identity)<span class="op">;</span></code></pre></div>
+<h3 id="example-1">Example</h3>
+<div class="sourceCode"><pre class="sourceCode js"><code class="sourceCode javascript"><span class="cf">if</span> (<span class="at">filterT</span>([<span class="kw">true</span><span class="op">,</span> <span class="dv">1</span><span class="op">,</span> <span class="kw">false</span><span class="op">,</span> <span class="st">''</span>]).<span class="at">length</span> <span class="op">&gt;</span> <span class="dv">0</span>) <span class="op">{</span>
+  <span class="co">// ...</span>
+<span class="op">}</span></code></pre></div>
+<h2 id="allt">allT</h2>
+<p>Similarly, to <code>filterT</code> there’s often the need to check if an array contains only truth values.</p>
+<h3 id="code-2">Code</h3>
+<div class="sourceCode"><pre class="sourceCode js"><code class="sourceCode javascript"><span class="kw">const</span> allT <span class="op">=</span> <span class="at">all</span>(identity)<span class="op">;</span></code></pre></div>
+<h3 id="example-2">Example</h3>
+<div class="sourceCode"><pre class="sourceCode js"><code class="sourceCode javascript"><span class="cf">if</span> (<span class="at">allT</span>([<span class="dv">1</span><span class="op">,</span> <span class="dv">0</span><span class="op">,</span> <span class="dv">1</span>])) <span class="op">{</span>
+  <span class="co">// ...</span>
+<span class="op">}</span></code></pre></div>
+<h2 id="safehead">safeHead</h2>
+<p>By default <code>head</code> is looking to get the first element of an array. The problem comes when the thing being checked for is not an array (most often an undefined returned when the property is missing). It would be nice if the code would not fail because of that.</p>
+<p>My <code>safeHead</code> differs greatly from what would be a canonical implementation in Haskell, where the return value would be of type <code>Maybe</code>. It is possible to use that type in JavaScript but it is bit more complicated than what I usually need to do.</p>
+<h3 id="code-3">Code</h3>
+<div class="sourceCode"><pre class="sourceCode js"><code class="sourceCode javascript"><span class="kw">const</span> safeHead <span class="op">=</span> <span class="at">compose</span>(head<span class="op">,</span> <span class="at">defaultTo</span>([]))<span class="op">;</span></code></pre></div>
+<h3 id="example-3">Example</h3>
+<div class="sourceCode"><pre class="sourceCode js"><code class="sourceCode javascript"><span class="kw">const</span> obj <span class="op">=</span> <span class="op">{</span><span class="dt">foo</span><span class="op">:</span> [<span class="dv">1</span><span class="op">,</span> <span class="dv">2</span><span class="op">,</span> <span class="dv">3</span>]<span class="op">};</span>
+<span class="kw">const</span> h <span class="op">=</span> <span class="at">safeHead</span>(<span class="va">obj</span>.<span class="at">bar</span>)<span class="op">;</span></code></pre></div>
+<h2 id="totitle">toTitle</h2>
+<p>Ramda contains <code>toUpper</code> and <code>toLower</code> which reflect JavaScript String’s object methods. Unfortunately, by default, there’s no way to the uppercase first letter of a string.</p>
+<p>The code is not really converting whole string to title case, rather than just the first word. So far I found it useful enough.</p>
+<h3 id="code-4">Code</h3>
+<div class="sourceCode"><pre class="sourceCode js"><code class="sourceCode javascript"><span class="kw">const</span> toTitle <span class="op">=</span> <span class="at">compose</span>(
+  <span class="at">join</span>(<span class="st">''</span>)<span class="op">,</span>
+  <span class="at">over</span>(<span class="at">lensIndex</span>(<span class="dv">0</span>)<span class="op">,</span> toUpper)
+)<span class="op">;</span></code></pre></div>
+<h3 id="example-4">Example</h3>
+<div class="sourceCode"><pre class="sourceCode js"><code class="sourceCode javascript"><span class="va">console</span>.<span class="at">log</span>(<span class="at">toTitle</span>(<span class="st">'test'</span>))<span class="op">;</span> <span class="co">// =&gt; &quot;Test&quot;</span></code></pre></div>
+<h2 id="imap">imap</h2>
+<p>One difference between using Ramda’s <code>map</code> and built in Array’s map is the lack of access to the element index. In most cases it’s not a problem. So far my most frequent use case was with React.js and creating a list of nodes. Each one of those nodes requires unique key and array index usually is a perfect solution. With <code>imap</code> it still can be used.</p>
+<h3 id="code-5">Code</h3>
+<div class="sourceCode"><pre class="sourceCode js"><code class="sourceCode javascript"><span class="kw">const</span> imap <span class="op">=</span> <span class="at">addIndex</span>(map)<span class="op">;</span></code></pre></div>
+<h3 id="example-5">Example</h3>
+<pre class="jsx"><code>&lt;ul&gt;
+  {imap((el, i) =&gt; &lt;li key={i}&gt;{el.text}&lt;/li&gt;, elements)}
+&lt;/ul&gt;</code></pre>
+<h2 id="peek">peek</h2>
+<p>Especially useful when debugging is an ability to inspect the value in a series of function applications.</p>
+<h3 id="code-6">Code</h3>
+<div class="sourceCode"><pre class="sourceCode js"><code class="sourceCode javascript"><span class="kw">const</span> peek <span class="op">=</span> <span class="at">tap</span>(<span class="va">console</span>.<span class="at">log</span>)<span class="op">;</span></code></pre></div>
+<h3 id="example-6">Example</h3>
+<div class="sourceCode"><pre class="sourceCode js"><code class="sourceCode javascript"><span class="co">// ...</span>
+<span class="kw">const</span> process <span class="op">=</span> <span class="at">compose</span>(
+  save<span class="op">,</span>
+  peek<span class="op">,</span>
+  transform<span class="op">,</span>
+  retrieve
+)<span class="op">;</span>
+<span class="co">// ...</span>
+<span class="at">process</span>(<span class="st">'12'</span>)<span class="op">;</span></code></pre></div>
+		</section>
+
+		<footer id="post-meta" class="clearfix">
+      <hr />
+      <div class="uk-grid">
+        <p class="uk-article-meta uk-width-1-2">
+          <span>Posted on</span> March 25
+        </p>
+
+        <p class="uk-article-meta uk-width-1-2 uk-text-right">
+          <span>Written by</span> Łukasz Czyżykowski
+        </p>
+      </div>
+
+      <div class="uk-text-center">
+        <a class="uk-icon-button" href="https://twitter.com/share">
+          <img src="../images/twitter.svg" width="16" height="16" alt="twitter icon" />
+        </a>
+
+        <a class="uk-icon-button" href="#" onclick="
+            window.open(
+              'https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(location.href),
+              'facebook-share-dialog',
+              'width=626,height=436');
+            return false;">
+
+          <img src="../images/facebook.svg" width="16" height="16" alt="facebook icon" />
+        </a>
+      </div>
+		</footer>
+	</article>
+
+</section>
+
+
+        </div>
+
+        <script>
+          if (window.location.hostname === 'czyzykowski.com') {
+            (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+            })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+            ga('create', 'UA-4012543-11', 'auto');
+            ga('send', 'pageview');
+          }
+        </script>
+    </body>
+</html>

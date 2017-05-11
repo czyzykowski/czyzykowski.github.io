@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>czyzykowski.com - URL fragment in the browser</title>
+
+        <link rel="shortcut icon" href="../images/favicon.ico">
+        <link rel="stylesheet" href="../css/uikit.min.css">
+        <link rel="stylesheet" href="../css/syntax.css">
+    </head>
+    <body>
+        <div class="uk-container uk-width-xxlarge">
+            <hr class="uk-margin-xlarge-top" />
+            <nav class="uk-position-small uk-position-fixed uk-position-right">
+                
+                  <a class="uk-margin-right" href="../">Home</a>
+                
+                <a class="uk-margin-right" href="../about.html">About</a>
+                <a class="uk-margin-right" href="https://twitter.com/czyzykowski">Twitter</a>
+            </nav>
+
+            <article class="uk-article">
+
+    <h1 class="uk-article-title">URL fragment in the browser</h1>
+    
+        <p class="uk-text-lead uk-text-muted">Recreating common behavior</p>
+    
+
+		<section id="post-body">
+            <p>When you got to a page with <code>#identifier</code> appended to the end the browser will, after loading the page jump directly to the element with <code>id=&quot;identifier&quot;</code>.</p>
+<p>Formally the part after hash is known as a fragment identifier (specified in <a href="https://tools.ietf.org/html/rfc3986#section-3.5">rfc3986</a>). And how the client should react to it depends on the specific MIME type. For HTML, it’s bringing that element into view.</p>
+<p>In my recent project, I had to recreate that behavior. I couldn’t depend on the browser because I was creating the page content on the fly. It depended on the series of AJAX requests and the initial page didn’t contain the element with the id from the URL hash.</p>
+<p>Turns out the behavior is not that complicated to reproduce. Thanks to a nifty DOM method perfectly suited to that task. <a href="https://developer.mozilla.org/en-US/docs/Web/API/Element/scrollIntoView"><code>scrollIntoView</code></a>. (Although there’s a warning on that page it only matters in the case of using <code>scrollIntoViewOptions</code>. My use case of simply passing <code>true</code> is supported broadly.)</p>
+<p>In the end, following bit of code is all that was needed.</p>
+<div class="sourceCode"><pre class="sourceCode js"><code class="sourceCode javascript"><span class="kw">const</span> elementId <span class="op">=</span> <span class="va">window</span>.<span class="va">location</span>.<span class="va">hash</span>.<span class="at">slice</span>(<span class="dv">1</span>)<span class="op">;</span>
+<span class="kw">const</span> element <span class="op">=</span> <span class="va">document</span>.<span class="at">getElementById</span>(elementId)<span class="op">;</span>
+<span class="cf">if</span> (element) <span class="op">{</span>
+  <span class="va">element</span>.<span class="at">scrollIntoView</span>(<span class="kw">true</span>)<span class="op">;</span>
+<span class="op">}</span></code></pre></div>
+<p><code>.slice(1)</code> is to remove <code>#</code> from the beginning of the string, so to have just the id. In the case where there’s no URL fragment present, it will return empty string. <code>document.getElementById</code> will return <code>null</code> if the element is not found (and there can’t be an element with an empty id).</p>
+<p>The only tricky part left was to execute this piece of code at the right time, when the desired element has been added to the page. After finding that place, works perfectly.</p>
+		</section>
+
+		<footer id="post-meta" class="clearfix">
+      <hr />
+      <div class="uk-grid">
+        <p class="uk-article-meta uk-width-1-2">
+          <span>Posted on</span> March  2
+        </p>
+
+        <p class="uk-article-meta uk-width-1-2 uk-text-right">
+          <span>Written by</span> Łukasz Czyżykowski
+        </p>
+      </div>
+
+      <div class="uk-text-center">
+        <a class="uk-icon-button" href="https://twitter.com/share">
+          <img src="../images/twitter.svg" width="16" height="16" alt="twitter icon" />
+        </a>
+
+        <a class="uk-icon-button" href="#" onclick="
+            window.open(
+              'https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(location.href),
+              'facebook-share-dialog',
+              'width=626,height=436');
+            return false;">
+
+          <img src="../images/facebook.svg" width="16" height="16" alt="facebook icon" />
+        </a>
+      </div>
+		</footer>
+	</article>
+
+</section>
+
+
+        </div>
+
+        <script>
+          if (window.location.hostname === 'czyzykowski.com') {
+            (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+            })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+            ga('create', 'UA-4012543-11', 'auto');
+            ga('send', 'pageview');
+          }
+        </script>
+    </body>
+</html>

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>czyzykowski.com - JavaScript and money</title>
+
+        <link rel="shortcut icon" href="../images/favicon.ico">
+        <link rel="stylesheet" href="../css/uikit.min.css">
+        <link rel="stylesheet" href="../css/syntax.css">
+    </head>
+    <body>
+        <div class="uk-container uk-width-xxlarge">
+            <hr class="uk-margin-xlarge-top" />
+            <nav class="uk-position-small uk-position-fixed uk-position-right">
+                
+                  <a class="uk-margin-right" href="../">Home</a>
+                
+                <a class="uk-margin-right" href="../about.html">About</a>
+                <a class="uk-margin-right" href="https://twitter.com/czyzykowski">Twitter</a>
+            </nav>
+
+            <article class="uk-article">
+
+    <h1 class="uk-article-title">JavaScript and money</h1>
+    
+        <p class="uk-text-lead uk-text-muted">Accuracy problem of floating point numbers</p>
+    
+
+		<section id="post-body">
+            <p>Floating point numbers can’t represent all decimal fractions precisely. The <a href="https://en.wikipedia.org/wiki/Floating_point#Accuracy_problems">accuracy problem</a> stems from the fact that underneath the value is stored in a binary which doesn’t match perfectly the decimal.</p>
+<p>To show the problem consider the following:</p>
+<div class="sourceCode"><pre class="sourceCode js"><code class="sourceCode javascript"><span class="fl">0.1</span> <span class="op">+</span> <span class="fl">0.2</span> <span class="op">===</span> <span class="fl">0.3</span> <span class="co">// =&gt; false</span></code></pre></div>
+<p>This looks strange. It seems so obvious to us, but we are used to calculating things in decimal. With floating point numbers, the number we see is an only approximation. With that knowledge we can recognize why the previous test was failing:</p>
+<div class="sourceCode"><pre class="sourceCode js"><code class="sourceCode javascript"><span class="fl">0.1</span> <span class="op">+</span> <span class="fl">0.2</span> <span class="co">// =&gt; 0.30000000000000004</span></code></pre></div>
+<p>It’s one of those things which one needs to be aware of when programming, especially in JavaScript. It’s because JavaScript only has floating point numbers. It simplifies a lot of things, but doing precise math is not one of them.</p>
+<p>The accuracy problem becomes especially pronounced when money is involved. Fortunately, the solution is quite simple. Scale all the values to whole cents (euro cents, centavos, kuruş, etc). Then do all the calculations on scaled values. Once calculations are done and ready to be displayed (or to be stored) convert it back to a fractional representation.</p>
+<p>What it means is that the floating point number behaves like a regular integer and there’s no accuracy problem in doing calculations on those.</p>
+<p>To help myself when working on those calculations I like to create two simple functions:</p>
+<div class="sourceCode"><pre class="sourceCode js"><code class="sourceCode javascript"><span class="kw">const</span> cents <span class="op">=</span> n <span class="op">=&gt;</span> n <span class="op">*</span> <span class="dv">100</span><span class="op">;</span>
+<span class="kw">const</span> dollars <span class="op">=</span> n <span class="op">=&gt;</span> n / <span class="dv">100</span><span class="op">;</span></code></pre></div>
+<p>With those functions, the problematic case from the beginning is fixed:</p>
+<div class="sourceCode"><pre class="sourceCode js"><code class="sourceCode javascript"><span class="at">cents</span>(<span class="fl">0.1</span>) <span class="op">+</span> <span class="at">cents</span>(<span class="fl">0.2</span>) <span class="op">===</span> <span class="at">cents</span>(<span class="fl">0.3</span>) <span class="co">// =&gt; true</span></code></pre></div>
+<p>Using descriptive names makes it easy to see when things are being converted and in which direction.</p>
+<p>Another helpful function is <code>display</code> which converts the number directly to a string:</p>
+<div class="sourceCode"><pre class="sourceCode js"><code class="sourceCode javascript"><span class="kw">const</span> display <span class="op">=</span> n <span class="op">=&gt;</span> (n / <span class="dv">100</span>).<span class="at">toFixed</span>(<span class="dv">2</span>)<span class="op">;</span></code></pre></div>
+<p>That way monetary value can be stored in cents directly.</p>
+		</section>
+
+		<footer id="post-meta" class="clearfix">
+      <hr />
+      <div class="uk-grid">
+        <p class="uk-article-meta uk-width-1-2">
+          <span>Posted on</span> March  3
+        </p>
+
+        <p class="uk-article-meta uk-width-1-2 uk-text-right">
+          <span>Written by</span> Łukasz Czyżykowski
+        </p>
+      </div>
+
+      <div class="uk-text-center">
+        <a class="uk-icon-button" href="https://twitter.com/share">
+          <img src="../images/twitter.svg" width="16" height="16" alt="twitter icon" />
+        </a>
+
+        <a class="uk-icon-button" href="#" onclick="
+            window.open(
+              'https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(location.href),
+              'facebook-share-dialog',
+              'width=626,height=436');
+            return false;">
+
+          <img src="../images/facebook.svg" width="16" height="16" alt="facebook icon" />
+        </a>
+      </div>
+		</footer>
+	</article>
+
+</section>
+
+
+        </div>
+
+        <script>
+          if (window.location.hostname === 'czyzykowski.com') {
+            (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+            })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+            ga('create', 'UA-4012543-11', 'auto');
+            ga('send', 'pageview');
+          }
+        </script>
+    </body>
+</html>

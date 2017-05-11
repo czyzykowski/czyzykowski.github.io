@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>czyzykowski.com - Markdown in Cactus</title>
+
+        <link rel="shortcut icon" href="../images/favicon.ico">
+        <link rel="stylesheet" href="../css/uikit.min.css">
+        <link rel="stylesheet" href="../css/syntax.css">
+    </head>
+    <body>
+        <div class="uk-container uk-width-xxlarge">
+            <hr class="uk-margin-xlarge-top" />
+            <nav class="uk-position-small uk-position-fixed uk-position-right">
+                
+                  <a class="uk-margin-right" href="../">Home</a>
+                
+                <a class="uk-margin-right" href="../about.html">About</a>
+                <a class="uk-margin-right" href="https://twitter.com/czyzykowski">Twitter</a>
+            </nav>
+
+            <article class="uk-article">
+
+    <h1 class="uk-article-title">Markdown in Cactus</h1>
+    
+        <p class="uk-text-lead uk-text-muted">Small code cleanup</p>
+    
+
+		<section id="post-body">
+            <h2 id="why-cactus">Why Cactus?</h2>
+<p>When I started thinking about building this site I wanted something simple, something which would not have a lot of moving parts. Also, something which I could host as a set of static files. I don’t really need a database and dynamic language to serve what I assumed would be mostly a set of static content.</p>
+<p>There’s a lot of static site generators. I decided to go with <a href="https://github.com/koenbok/Cactus">Cactus</a> because it was very easy to setup and it’s using Django, which I know very well.</p>
+<h2 id="why-markdown">Why markdown?</h2>
+<p>Although HTML is not a bad markup language it can be verbose. It can be written manually, but the experience is not the best.</p>
+<p>Instead, there’s a lot of markup languages which convert very easily to HTML and are much nicer to write by hand.</p>
+<p>One markup language which seems to be everywhere nowadays is markdown. I was already using it a lot so it would only be natural to use it to write articles here.</p>
+<h1 id="cactus-and-markdown">Cactus and markdown</h1>
+<p>Cactus by default comes by default with the markdown support. It depends on <a href="https://github.com/Alir3z4/django-markwhat">django-markwhat</a>. With it using markdown in the templates is a simple matter of adding a filter. It looks something like that:</p>
+<pre class="django"><code>{% filter markdown %}
+# Title
+Paragraph with **bold** in it.
+{% endfilter %}</code></pre>
+<p>It was a good start.</p>
+<p>I had a snippet which would help me with creating articles with big markdown filter in the middle. I could continue using that, but I wanted to step up the ease of use.</p>
+<h2 id="cactus-and-markdown-files">Cactus and markdown files</h2>
+<p>The Older version of cactus come with a nice <a href="https://github.com/koenbok/CactusBlog/blob/master/plugins/markdown.disabled.py">markdown plugin</a>. Only thing you would need is to put markdown file with <code>.md</code> extension in the right directory and the plugin would convert it automatically into an HTML. That’s one less step to worry about.</p>
+<h2 id="problem-with-the-original-plugin">Problem with the original plugin</h2>
+<p>There were two problems with the original plugin:</p>
+<ul>
+<li>it was using older markdown parser, one which was not included in the current cactus version,</li>
+<li>it lacked proper escaping, the plugin would fail if any of the content contained Django template tags (ironically I find out about it when writing this article)</li>
+</ul>
+<p>Those are not really big problems and fixing didn’t require a lot of work.</p>
+<p>Here’s the updated version (also available as a <a href="https://gist.github.com/czyzykowski/8b971c879460c69afb42">github gist</a>).</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python">
+<span class="im">from</span> __future__ <span class="im">import</span> unicode_literals
+
+<span class="im">import</span> codecs
+
+<span class="im">from</span> os <span class="im">import</span> remove
+<span class="im">from</span> markdown2 <span class="im">import</span> Markdown
+<span class="im">from</span> cactus.utils.filesystem <span class="im">import</span> fileList
+
+<span class="co"># requires markdown2 package, to install it run</span>
+<span class="co"># pip install markdown2</span>
+
+template <span class="op">=</span> <span class="st">&quot;&quot;&quot;</span>
+<span class="sc">{metadata}</span>
+<span class="sc">{{% e</span><span class="st">xtends &quot;</span><span class="sc">{extends}</span><span class="st">&quot; %</span><span class="sc">}}</span>
+<span class="sc">{{</span><span class="st">% block </span><span class="sc">{block}</span><span class="st"> %</span><span class="sc">}}</span>
+<span class="sc">{{</span><span class="st">% verbatim %</span><span class="sc">}}</span>
+<span class="sc">{html}</span>
+<span class="sc">{{% e</span><span class="st">ndverbatim %</span><span class="sc">}}</span>
+<span class="sc">{{% e</span><span class="st">ndblock %</span><span class="sc">}}</span>
+<span class="st">&quot;&quot;&quot;</span>
+
+CLEANUP <span class="op">=</span> []
+DEFAULT_EXTENDS <span class="op">=</span> <span class="st">'post.html'</span>
+DEFAULT_BLOCK <span class="op">=</span> <span class="st">'body'</span>
+
+<span class="kw">def</span> preBuild(site):
+    <span class="cf">for</span> path <span class="kw">in</span> fileList(site.paths[<span class="st">'pages'</span>]):
+
+        <span class="cf">if</span> <span class="kw">not</span> path.endswith(<span class="st">'.md'</span>):
+            <span class="cf">continue</span>
+
+        md <span class="op">=</span> Markdown(extras<span class="op">=</span>[
+            <span class="st">'fenced-code-blocks'</span>,
+            <span class="st">'footnotes'</span>,
+            <span class="st">'header-ids'</span>,
+            <span class="st">'metadata'</span>,
+            <span class="st">'smarty-pants'</span>,
+            <span class="st">'tables'</span>,
+        ])
+
+        <span class="cf">with</span> codecs.<span class="bu">open</span>(path, <span class="st">'r'</span>, <span class="st">'utf-8'</span>) <span class="im">as</span> f:
+            html <span class="op">=</span> md.convert(f.read())
+
+        metadata <span class="op">=</span> [<span class="st">'</span><span class="sc">{}</span><span class="st">: </span><span class="sc">{}</span><span class="st">'</span>.<span class="bu">format</span>(k, v)
+                    <span class="cf">for</span> k, v <span class="kw">in</span> md.metadata.items()]
+        out_path <span class="op">=</span> path.replace(<span class="st">'.md'</span>, <span class="st">'.html'</span>)
+
+        extends <span class="op">=</span> md.metadata.get(<span class="st">'extends'</span>,
+                                  DEFAULT_EXTENDS)
+        block <span class="op">=</span> md.metadata.get(<span class="st">'block'</span>, DEFAULT_BLOCK)
+
+        <span class="cf">with</span> codecs.<span class="bu">open</span>(out_path, <span class="st">'w'</span>, <span class="st">'utf-8'</span>) <span class="im">as</span> f:
+            data <span class="op">=</span> template.<span class="bu">format</span>(
+                metadata<span class="op">=</span><span class="st">'</span><span class="ch">\n</span><span class="st">'</span>.join(metadata),
+                html<span class="op">=</span>html,
+                extends<span class="op">=</span>extends,
+                block<span class="op">=</span>block,
+            )
+            f.write(data)
+
+        CLEANUP.append(out_path)
+
+<span class="kw">def</span> postBuild(site):
+    <span class="kw">global</span> CLEANUP
+    <span class="cf">for</span> path <span class="kw">in</span> CLEANUP:
+        remove(path)
+    CLEANUP <span class="op">=</span> []</code></pre></div>
+<h2 id="how-the-plugin-works">How the plugin works</h2>
+<p>It’s interesting to know how simple the plugin is. Both the original and my modified version work in the same fashion.</p>
+<ol style="list-style-type: decimal">
+<li>Look for files with <code>.md</code> extension in the <code>pages</code> directory.</li>
+<li>For each file
+<ol style="list-style-type: decimal">
+<li>Extract metadata</li>
+<li>Convert markdown into HTML</li>
+<li>Write down Django template file with both metadata and converted markdown content to the filesystem</li>
+<li>Add the generated file to be cleaned up later</li>
+</ol></li>
+<li>Once the build finishes remove all the generated file.</li>
+</ol>
+<p>The rest of the work of turning those template files into static content is handled by the blog plugin.</p>
+<h2 id="ordering-problem">Ordering problem</h2>
+<p>To work, the system requires two plugins to work together: markdown and blog. The order of those is important. The markdown plugin needs to run first, to create Django template files. Only then blog plugin can properly convert those template files into the static content of a blog and create proper entries in the index and in the archive.</p>
+<p>By default cactus orders plugins alphabetically, which meant that markdown would only run after blog plugin. That was too late.</p>
+<p>Fortunately, the problem has a trivial solution, just rename markdown plugin file to something which will be ordered before <code>blog</code>. I went with <code>0_markdown.py</code> but anything starting with <code>a</code> or a number would do.</p>
+<h2 id="summary">Summary</h2>
+<p>Although you, as a reader cannot tell the difference, several of the articles here are already powered by plain markdown files. It works exactly as expected.</p>
+<p>To be honest I didn’t do it to speed up the posting speed (which doesn’t really matter). What I gained from the process is the experience of digging into an unknown codebase and fixing the problems I found on the way. Now I’m much better equipped to modify any other part of the system.</p>
+		</section>
+
+		<footer id="post-meta" class="clearfix">
+      <hr />
+      <div class="uk-grid">
+        <p class="uk-article-meta uk-width-1-2">
+          <span>Posted on</span> March  9
+        </p>
+
+        <p class="uk-article-meta uk-width-1-2 uk-text-right">
+          <span>Written by</span> Łukasz Czyżykowski
+        </p>
+      </div>
+
+      <div class="uk-text-center">
+        <a class="uk-icon-button" href="https://twitter.com/share">
+          <img src="../images/twitter.svg" width="16" height="16" alt="twitter icon" />
+        </a>
+
+        <a class="uk-icon-button" href="#" onclick="
+            window.open(
+              'https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(location.href),
+              'facebook-share-dialog',
+              'width=626,height=436');
+            return false;">
+
+          <img src="../images/facebook.svg" width="16" height="16" alt="facebook icon" />
+        </a>
+      </div>
+		</footer>
+	</article>
+
+</section>
+
+
+        </div>
+
+        <script>
+          if (window.location.hostname === 'czyzykowski.com') {
+            (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+            })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+            ga('create', 'UA-4012543-11', 'auto');
+            ga('send', 'pageview');
+          }
+        </script>
+    </body>
+</html>

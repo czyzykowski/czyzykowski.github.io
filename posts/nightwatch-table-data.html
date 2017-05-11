@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>czyzykowski.com - Extracting table data</title>
+
+        <link rel="shortcut icon" href="../images/favicon.ico">
+        <link rel="stylesheet" href="../css/uikit.min.css">
+        <link rel="stylesheet" href="../css/syntax.css">
+    </head>
+    <body>
+        <div class="uk-container uk-width-xxlarge">
+            <hr class="uk-margin-xlarge-top" />
+            <nav class="uk-position-small uk-position-fixed uk-position-right">
+                
+                  <a class="uk-margin-right" href="../">Home</a>
+                
+                <a class="uk-margin-right" href="../about.html">About</a>
+                <a class="uk-margin-right" href="https://twitter.com/czyzykowski">Twitter</a>
+            </nav>
+
+            <article class="uk-article">
+
+    <h1 class="uk-article-title">Extracting table data</h1>
+    
+        <p class="uk-text-lead uk-text-muted">Nightwatch's custom command</p>
+    
+
+		<section id="post-body">
+            <p><a href="http://nightwatchjs.org/">Nightwatch</a> is a great help with creating in-browser tests for web applications.</p>
+<p>It’s very convenient to use CSS selectors to get information out of the DOM. The very same language used for day to day development.</p>
+<p>When selecting one element at the time checking the content of a table can become quite a complex task. It requires writing assertion against each table cell separately. With more complex tables this can quickly become unwieldy.</p>
+<p>The ideal would be to get the whole table at once. Unfortunately, nightwatch lacks a way of doing it. Fortunately, it’s not that hard to add.</p>
+<p>Following is a <a href="http://nightwatchjs.org/guide#writing-custom-commands">nightwatch’s custom command</a> which will return the content of a table as an array of arrays.</p>
+<div class="sourceCode"><pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">const</span> idElements <span class="op">=</span> (browser<span class="op">,</span> element<span class="op">,</span> selector) <span class="op">=&gt;</span> <span class="op">{</span>
+  <span class="cf">return</span> <span class="kw">new</span> <span class="at">Promise</span>((resolve<span class="op">,</span> reject) <span class="op">=&gt;</span> <span class="op">{</span>
+    <span class="kw">const</span> cb <span class="op">=</span> result <span class="op">=&gt;</span> <span class="op">{</span>
+      <span class="cf">if</span> (<span class="va">result</span>.<span class="at">state</span> <span class="op">===</span> <span class="st">'success'</span>) <span class="op">{</span>
+        <span class="at">resolve</span>(<span class="va">result</span>.<span class="at">value</span>)<span class="op">;</span>
+      <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span>
+        <span class="at">reject</span>(result)<span class="op">;</span>
+      <span class="op">}</span>
+    <span class="op">};</span>
+    <span class="va">browser</span>.<span class="at">elementIdElements</span>(
+      <span class="va">element</span>.<span class="at">ELEMENT</span><span class="op">,</span> <span class="st">'css selector'</span><span class="op">,</span> selector<span class="op">,</span> cb)<span class="op">;</span>
+  <span class="op">}</span>)<span class="op">;</span>
+<span class="op">};</span>
+
+<span class="kw">const</span> text <span class="op">=</span> (browser<span class="op">,</span> element) <span class="op">=&gt;</span> <span class="op">{</span>
+  <span class="cf">return</span> <span class="kw">new</span> <span class="at">Promise</span>((resolve<span class="op">,</span> reject) <span class="op">=&gt;</span> <span class="op">{</span>
+    <span class="va">browser</span>.<span class="at">elementIdText</span>(<span class="va">element</span>.<span class="at">ELEMENT</span><span class="op">,</span> result <span class="op">=&gt;</span> <span class="op">{</span>
+      <span class="cf">if</span> (<span class="va">result</span>.<span class="at">state</span> <span class="op">===</span> <span class="st">'success'</span>) <span class="op">{</span>
+        <span class="at">resolve</span>(<span class="va">result</span>.<span class="at">value</span>)<span class="op">;</span>
+      <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span>
+        <span class="at">reject</span>(result)<span class="op">;</span>
+      <span class="op">}</span>
+    <span class="op">}</span>)<span class="op">;</span>
+  <span class="op">}</span>)<span class="op">;</span>
+<span class="op">};</span>
+
+<span class="va">exports</span>.<span class="at">command</span> <span class="op">=</span> <span class="kw">function</span> (selector<span class="op">,</span> callback) <span class="op">{</span>
+  <span class="kw">const</span> getText <span class="op">=</span> <span class="va">text</span>.<span class="at">bind</span>(<span class="kw">null</span><span class="op">,</span> <span class="kw">this</span>)<span class="op">;</span>
+  <span class="kw">const</span> cb <span class="op">=</span> result <span class="op">=&gt;</span> <span class="op">{</span>
+    <span class="cf">return</span> <span class="va">Promise</span>.<span class="at">all</span>(<span class="va">result</span>.<span class="va">value</span>.<span class="at">map</span>(element <span class="op">=&gt;</span> <span class="op">{</span>
+      <span class="cf">return</span> <span class="at">idElements</span>(<span class="kw">this</span><span class="op">,</span> element<span class="op">,</span> <span class="st">'td, th'</span>)
+      .<span class="at">then</span>(cells <span class="op">=&gt;</span> <span class="va">Promise</span>.<span class="at">all</span>(<span class="va">cells</span>.<span class="at">map</span>(getText)))<span class="op">;</span>
+    <span class="op">}</span>))
+    .<span class="at">then</span>(data <span class="op">=&gt;</span> <span class="op">{</span>
+      <span class="at">callback</span>(data)<span class="op">;</span>
+    <span class="op">}</span>)<span class="op">;</span>
+  <span class="op">};</span>
+  <span class="kw">this</span>.<span class="at">elements</span>(<span class="st">'css selector'</span><span class="op">,</span> <span class="vs">`</span><span class="sc">${</span>selector<span class="sc">}</span><span class="vs"> tr`</span><span class="op">,</span> cb)<span class="op">;</span>
+  <span class="cf">return</span> <span class="kw">this</span><span class="op">;</span>
+<span class="op">};</span></code></pre></div>
+<p>The biggest complication with getting text content of a table is that the task requires three levels of asynchronous calls. Each one depends on the result of the previous one.</p>
+<p>Managing multiple asynchronous calls is quite a common task in the node and there is a popular solution: the <a href="https://github.com/caolan/async">async</a> module. Instead of managing state between all callbacks one can depend on familiar set of functions: <code>map</code>, <code>filter</code>, etc.</p>
+<p>Another approach is to use <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promises</a>. They were designed to help with reasoning about asynchronous code. It’s easy to turn regular callback-style code into one using Promises.</p>
+<p>Here’s an example how to use that new command.</p>
+<div class="sourceCode"><pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="va">module</span>.<span class="at">exports</span> <span class="op">=</span> <span class="op">{</span>
+  <span class="st">'Test example'</span><span class="op">:</span> browser <span class="op">=&gt;</span> <span class="op">{</span>
+    browser
+      .<span class="at">url</span>(<span class="st">'http://www.example.com'</span>)
+      .<span class="at">waitForElementVisible</span>(<span class="st">'body'</span><span class="op">,</span> <span class="dv">1000</span>)
+      .<span class="at">perform</span>((client<span class="op">,</span> done) <span class="op">=&gt;</span> <span class="op">{</span>
+        <span class="va">client</span>.<span class="at">tableContent</span>(<span class="st">'table'</span><span class="op">,</span> rows <span class="op">=&gt;</span> <span class="op">{</span>
+          <span class="va">client</span>.<span class="va">assert</span>.<span class="at">equal</span>(rows[<span class="dv">0</span>]<span class="op">,</span> [<span class="st">'1'</span><span class="op">,</span> <span class="st">'one'</span>])<span class="op">;</span>
+          <span class="va">client</span>.<span class="va">assert</span>.<span class="at">equal</span>(rows[<span class="dv">1</span>]<span class="op">,</span> [<span class="st">'2'</span><span class="op">,</span> <span class="st">'two'</span>])<span class="op">;</span>
+          <span class="at">done</span>()<span class="op">;</span>
+        <span class="op">}</span>)<span class="op">;</span>
+      <span class="op">}</span>)
+      .<span class="at">end</span>()<span class="op">;</span>
+  <span class="op">}</span>
+<span class="op">};</span></code></pre></div>
+<p>Because <code>.tableContent</code> can make a lot of asynchronous calls it’s paramount to wait for all of them to finish. Exactly why it’s required is described in <a href="../posts/nightwatch-gotcha.html">the previous post</a>.</p>
+		</section>
+
+		<footer id="post-meta" class="clearfix">
+      <hr />
+      <div class="uk-grid">
+        <p class="uk-article-meta uk-width-1-2">
+          <span>Posted on</span> March  7
+        </p>
+
+        <p class="uk-article-meta uk-width-1-2 uk-text-right">
+          <span>Written by</span> Łukasz Czyżykowski
+        </p>
+      </div>
+
+      <div class="uk-text-center">
+        <a class="uk-icon-button" href="https://twitter.com/share">
+          <img src="../images/twitter.svg" width="16" height="16" alt="twitter icon" />
+        </a>
+
+        <a class="uk-icon-button" href="#" onclick="
+            window.open(
+              'https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(location.href),
+              'facebook-share-dialog',
+              'width=626,height=436');
+            return false;">
+
+          <img src="../images/facebook.svg" width="16" height="16" alt="facebook icon" />
+        </a>
+      </div>
+		</footer>
+	</article>
+
+</section>
+
+
+        </div>
+
+        <script>
+          if (window.location.hostname === 'czyzykowski.com') {
+            (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+            })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+            ga('create', 'UA-4012543-11', 'auto');
+            ga('send', 'pageview');
+          }
+        </script>
+    </body>
+</html>

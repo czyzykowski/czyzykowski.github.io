@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>czyzykowski.com - SMTP, SSL and Haskell</title>
+
+        <link rel="shortcut icon" href="../images/favicon.ico">
+        <link rel="stylesheet" href="../css/uikit.min.css">
+        <link rel="stylesheet" href="../css/syntax.css">
+    </head>
+    <body>
+        <div class="uk-container uk-width-xxlarge">
+            <hr class="uk-margin-xlarge-top" />
+            <nav class="uk-position-small uk-position-fixed uk-position-right">
+                
+                  <a class="uk-margin-right" href="../">Home</a>
+                
+                <a class="uk-margin-right" href="../about.html">About</a>
+                <a class="uk-margin-right" href="https://twitter.com/czyzykowski">Twitter</a>
+            </nav>
+
+            <article class="uk-article">
+
+    <h1 class="uk-article-title">SMTP, SSL and Haskell</h1>
+    
+        <p class="uk-text-lead uk-text-muted">Sending an email from the Haskell code</p>
+    
+
+		<section id="post-body">
+            <p>When writing server application there comes a time when you need to notify someone about an unexpected behavior. Or maybe you just need to report each day that the code is functioning as expected.</p>
+<p>Email is the best and the simplest way to do that. Of course there are other ways, but usually they require more upfront setup.</p>
+<p>One would expect that given ubiquity of email each language will have mature and easy to use solution for that purpose.</p>
+<p>When I had to accomplish this task in Haskell I quickly run into problems, but let’s start from the beginning.</p>
+<p>As with everything Haskell related my first step were directed to <a href="http://hackage.haskell.org/">Hackage</a>. A quick search resulted in a package which looked perfect.</p>
+<p><a href="https://hackage.haskell.org/package/smtp-mail">smtp-email</a> provides a simple interface:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">sendMailWithLogin ::</span> <span class="dt">HostName</span> <span class="ot">-&gt;</span>
+                     <span class="dt">UserName</span> <span class="ot">-&gt;</span>
+                     <span class="dt">Password</span> <span class="ot">-&gt;</span>
+                     <span class="dt">Mail</span> <span class="ot">-&gt;</span>
+                     <span class="dt">IO</span> ()</code></pre></div>
+<p>It even exposes <code>Mail</code> constructor, so one doesn’t have to depend on <a href="http://hackage.haskell.org/package/mime-mail">mime-mail</a>. All very convenient.</p>
+<p>The library works great but there is a catch. It doesn’t support SSL and nowadays that means you cannot use it with almost any SMTP server.</p>
+<p>I had to find a way to connect to SMTP server using SSL and only then to send a message.</p>
+<p>A lot of searching, mostly on Stack Overflow finally brought a clue that I should be using <a href="http://hackage.haskell.org/package/HaskellNet-SSL">HaskellNet-SSL</a> package. Together with <a href="http://hackage.haskell.org/package/HaskellNet">HaskellNet</a> and <a href="http://hackage.haskell.org/package/mime-mail">mime-mail</a>, I was able to finally accomplish my goal. Here’s the code:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">import </span><span class="dt">Control.Monad</span>
+<span class="kw">import </span><span class="dt">Data.ByteString.Lazy</span> (toStrict)
+<span class="kw">import </span><span class="dt">Data.Text</span> (unpack)
+<span class="kw">import </span><span class="dt">Data.Text.Lazy</span> (<span class="dt">Text</span>)
+<span class="kw">import </span><span class="dt">Network.HaskellNet.Auth</span>
+<span class="kw">import </span><span class="dt">Network.HaskellNet.SMTP</span>
+<span class="kw">import </span><span class="dt">Network.HaskellNet.SMTP.SSL</span>
+<span class="kw">import </span><span class="dt">Network.Mail.Mime</span>
+
+<span class="ot">toString ::</span> <span class="dt">Address</span> <span class="ot">-&gt;</span> <span class="dt">String</span>
+toString <span class="dt">Address</span> { addressEmail <span class="fu">=</span> email } <span class="fu">=</span> unpack email
+
+<span class="ot">sendEmail ::</span> <span class="dt">Mail</span> <span class="ot">-&gt;</span> <span class="dt">IO</span> ()
+senEmail msg <span class="fu">=</span> <span class="kw">do</span>
+  rendered   <span class="ot">&lt;-</span> renderMail' msg
+  doSTTPSSL <span class="st">&quot;smtp.example.com&quot;</span> <span class="fu">$</span> \connection <span class="ot">-&gt;</span> <span class="kw">do</span>
+      succeeded  <span class="ot">&lt;-</span> authenticate <span class="dt">LOGIN</span>
+                                 <span class="st">&quot;username&quot;</span>
+                                 <span class="st">&quot;password&quot;</span>
+                                 connection
+      when succeeded <span class="fu">$</span>
+          sendMail (toString (mailFrom msg))
+                   (map toString (mailTo msg))
+                   (toStrict rendered) connection</code></pre></div>
+<p>There’s not a lot of code to accomplish the task. It’s basically an example how to combine those three packages together.</p>
+<p>The HaskellNet-SSL library also exposes STARTTLS methods, so that can be used in place of SSL.</p>
+		</section>
+
+		<footer id="post-meta" class="clearfix">
+      <hr />
+      <div class="uk-grid">
+        <p class="uk-article-meta uk-width-1-2">
+          <span>Posted on</span> July 11
+        </p>
+
+        <p class="uk-article-meta uk-width-1-2 uk-text-right">
+          <span>Written by</span> Łukasz Czyżykowski
+        </p>
+      </div>
+
+      <div class="uk-text-center">
+        <a class="uk-icon-button" href="https://twitter.com/share">
+          <img src="../images/twitter.svg" width="16" height="16" alt="twitter icon" />
+        </a>
+
+        <a class="uk-icon-button" href="#" onclick="
+            window.open(
+              'https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(location.href),
+              'facebook-share-dialog',
+              'width=626,height=436');
+            return false;">
+
+          <img src="../images/facebook.svg" width="16" height="16" alt="facebook icon" />
+        </a>
+      </div>
+		</footer>
+	</article>
+
+</section>
+
+
+        </div>
+
+        <script>
+          if (window.location.hostname === 'czyzykowski.com') {
+            (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+            })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+            ga('create', 'UA-4012543-11', 'auto');
+            ga('send', 'pageview');
+          }
+        </script>
+    </body>
+</html>

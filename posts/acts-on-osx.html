@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>czyzykowski.com - acts on OS X</title>
+
+        <link rel="shortcut icon" href="../images/favicon.ico">
+        <link rel="stylesheet" href="../css/uikit.min.css">
+        <link rel="stylesheet" href="../css/syntax.css">
+    </head>
+    <body>
+        <div class="uk-container uk-width-xxlarge">
+            <hr class="uk-margin-xlarge-top" />
+            <nav class="uk-position-small uk-position-fixed uk-position-right">
+                
+                  <a class="uk-margin-right" href="../">Home</a>
+                
+                <a class="uk-margin-right" href="../about.html">About</a>
+                <a class="uk-margin-right" href="https://twitter.com/czyzykowski">Twitter</a>
+            </nav>
+
+            <article class="uk-article">
+
+    <h1 class="uk-article-title">acts on OS X</h1>
+    
+        <p class="uk-text-lead uk-text-muted">Small customizations</p>
+    
+
+		<section id="post-body">
+            <p>In my previous post about <a href="../posts/backups.html">backups</a> I mentioned that I customized <a href="https://github.com/alexjurkiewicz/acts">acts</a> to work on OS X. It turned out those changes were not that big and only one was related to the OS X itself.</p>
+<h3 id="local-config">Local config</h3>
+<p>By default acts expects its config file to be system wide, installed either in <code>/etc/acts.conf</code> or <code>/usr/local/ect/acts.conf</code>. It’s perfectly valid default but I wanted to keep the configuration file in my home directory, which is also the thing which I want to backup.</p>
+<p>The change required adding three lines of code to the beginning of the acts script:</p>
+<pre><code>if [[ ... ]]
+    # ...
+elif [ -f $HOME/.acts.conf ] ; then
+    . $HOME/.acts.conf
+    log_debug &quot;load-config source=$HOME/.acts.conf&quot;
+fi</code></pre>
+<p><a href="https://github.com/czyzykowski/acts/commit/13fdbc800bba4f79d1b343f1cc3512f438c2871b">The change</a> on GitHub.</p>
+<h3 id="run-file">Run file</h3>
+<p>Because acts is expected to be run by root, by default it creates lockfile in <code>/var/run</code> directory. My need of running it as my regular user meant that I had to modify that default. It required two steps.</p>
+<p>First was to create directory in <code>/var/run</code> which will be writable by my user:</p>
+<pre><code>$ sudo mkdir /var/run/acts
+$ sudo chown $USER: /var/run/acts</code></pre>
+<p>The second step is easy thanks to acts being flexible enough to look for <code>lockfile</code> setting in the environment. This meant that to change it I only had to invoke it with the extra stuff:</p>
+<pre><code>$ lockfile=/var/run/acts/acts.lock acts</code></pre>
+<h3 id="configuration-file">Configuration file</h3>
+<p>Last required change, to accommodate the difference between Linux and OSX was with the default tarsnap command in the configuration file. It used two commands: <code>nice</code> and <code>ionice</code> to make sure that tarsnap will not take too much of the resources.</p>
+<p>Unfortunately <code>ionice</code> is not available on OS X.</p>
+<p>The simplest change would be to just remove it from the command and mark it as done. On the other hand, it is possible to to make the config file compatible with both Linux and OS X. Small bash conditional</p>
+<pre><code>ionice=&quot;&quot;
+if type ionice &gt; /dev/null 2&gt;&amp;1 ; then
+    ionice=&quot;ionice -c3&quot;
+fi
+tarsnap=&quot;nice -n19 $ionice tarsnap&quot;</code></pre>
+<p>That way, if <code>ionice</code> is available on the system it will be used. Otherwise, it’s skipped from the tarsnap invocation.</p>
+<h3 id="summary">Summary</h3>
+<p>The changes required to make acts work on my system were tiny. It shows how well it is written.</p>
+<p>It has been a month since I started using it and it works perfectly.</p>
+<p>If anyone is interested my changes are on <a href="https://github.com/czyzykowski/acts">GitHub</a>.</p>
+		</section>
+
+		<footer id="post-meta" class="clearfix">
+      <hr />
+      <div class="uk-grid">
+        <p class="uk-article-meta uk-width-1-2">
+          <span>Posted on</span> March 12
+        </p>
+
+        <p class="uk-article-meta uk-width-1-2 uk-text-right">
+          <span>Written by</span> Łukasz Czyżykowski
+        </p>
+      </div>
+
+      <div class="uk-text-center">
+        <a class="uk-icon-button" href="https://twitter.com/share">
+          <img src="../images/twitter.svg" width="16" height="16" alt="twitter icon" />
+        </a>
+
+        <a class="uk-icon-button" href="#" onclick="
+            window.open(
+              'https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(location.href),
+              'facebook-share-dialog',
+              'width=626,height=436');
+            return false;">
+
+          <img src="../images/facebook.svg" width="16" height="16" alt="facebook icon" />
+        </a>
+      </div>
+		</footer>
+	</article>
+
+</section>
+
+
+        </div>
+
+        <script>
+          if (window.location.hostname === 'czyzykowski.com') {
+            (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+            })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+            ga('create', 'UA-4012543-11', 'auto');
+            ga('send', 'pageview');
+          }
+        </script>
+    </body>
+</html>

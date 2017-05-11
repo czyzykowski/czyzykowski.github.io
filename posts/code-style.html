@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>czyzykowski.com - Code style</title>
+
+        <link rel="shortcut icon" href="../images/favicon.ico">
+        <link rel="stylesheet" href="../css/uikit.min.css">
+        <link rel="stylesheet" href="../css/syntax.css">
+    </head>
+    <body>
+        <div class="uk-container uk-width-xxlarge">
+            <hr class="uk-margin-xlarge-top" />
+            <nav class="uk-position-small uk-position-fixed uk-position-right">
+                
+                  <a class="uk-margin-right" href="../">Home</a>
+                
+                <a class="uk-margin-right" href="../about.html">About</a>
+                <a class="uk-margin-right" href="https://twitter.com/czyzykowski">Twitter</a>
+            </nav>
+
+            <article class="uk-article">
+
+    <h1 class="uk-article-title">Code style</h1>
+    
+        <p class="uk-text-lead uk-text-muted">Why consistency matters</p>
+    
+
+		<section id="post-body">
+            <p>I’m a big proponent of enforcing code style, with an editor plugin and with build server checks. This way no bad code can slip through to the codebase.</p>
+<p>But it’s not because I like specific code style. Aesthetics doesn’t matter. I don’t really care if you will use quotes or double quotes. Camel case or snake case. Those details are irrelevant. They do not matter for the end user, so stop worry about which code style is the best.</p>
+<p>Consistency is the key.</p>
+<p>Saying all that there are less readable choices. Those are out. The reason being that they hinder the job of a programmer and everything which does that should be avoided.</p>
+<p>With code, I spend the most time reading it. Find where the change needs to happen. Understand the piece you are looking at. This happens all the time.</p>
+<p>Having consistent style means I can do my task faster. I can scan given method and know what to expect. My eye will learn graphical patterns. Given set of characters will immediately transfer its meaning. You become more precise and faster.</p>
+<p>On the other hand, without consistent styling, each time I encounter a piece of code first task is to adjust to the local flavor. Only then I can start decoding the meaning behind it. Granted, it doesn’t take long, but given that it’s the most common tasks while programming I want to avoid what’s unnecessary. Because it happens so often any moment lost while reading will compound to a lot of lost time.</p>
+<p>I like to think about consistent styling as having consistent formatting for a book.</p>
+<p>Imagine reading a book where each sentence or each page would look differently. You would have one page completely bold. Another one with margins so huge that you would have only one word per line. And yet another one would have line height set so low that the lines would jumble together. It would be harder to read, unnecessary harder.</p>
+<p>We should treat our code in the same way as a published text. The consistency makes it easier to focus on the content, on the message, on the underlying meaning. It makes reading it easier and that means we can get our job faster.</p>
+		</section>
+
+		<footer id="post-meta" class="clearfix">
+      <hr />
+      <div class="uk-grid">
+        <p class="uk-article-meta uk-width-1-2">
+          <span>Posted on</span> February 29
+        </p>
+
+        <p class="uk-article-meta uk-width-1-2 uk-text-right">
+          <span>Written by</span> Łukasz Czyżykowski
+        </p>
+      </div>
+
+      <div class="uk-text-center">
+        <a class="uk-icon-button" href="https://twitter.com/share">
+          <img src="../images/twitter.svg" width="16" height="16" alt="twitter icon" />
+        </a>
+
+        <a class="uk-icon-button" href="#" onclick="
+            window.open(
+              'https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(location.href),
+              'facebook-share-dialog',
+              'width=626,height=436');
+            return false;">
+
+          <img src="../images/facebook.svg" width="16" height="16" alt="facebook icon" />
+        </a>
+      </div>
+		</footer>
+	</article>
+
+</section>
+
+
+        </div>
+
+        <script>
+          if (window.location.hostname === 'czyzykowski.com') {
+            (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+            })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+            ga('create', 'UA-4012543-11', 'auto');
+            ga('send', 'pageview');
+          }
+        </script>
+    </body>
+</html>

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>czyzykowski.com - fish shell</title>
+
+        <link rel="shortcut icon" href="../images/favicon.ico">
+        <link rel="stylesheet" href="../css/uikit.min.css">
+        <link rel="stylesheet" href="../css/syntax.css">
+    </head>
+    <body>
+        <div class="uk-container uk-width-xxlarge">
+            <hr class="uk-margin-xlarge-top" />
+            <nav class="uk-position-small uk-position-fixed uk-position-right">
+                
+                  <a class="uk-margin-right" href="../">Home</a>
+                
+                <a class="uk-margin-right" href="../about.html">About</a>
+                <a class="uk-margin-right" href="https://twitter.com/czyzykowski">Twitter</a>
+            </nav>
+
+            <article class="uk-article">
+
+    <h1 class="uk-article-title">fish shell</h1>
+    
+        <p class="uk-text-lead uk-text-muted">A better tool</p>
+    
+
+		<section id="post-body">
+            <h2 id="introduction">Introduction</h2>
+<p>Nowadays accepted default for a <a href="https://en.wikipedia.org/wiki/POSIX">POSIX</a> shell is <a href="https://www.gnu.org/software/bash/bash.html">bash</a>. A piece of software from 1989, but made compatible with Bourne shell, which is from 1977. That’s a lot of time and even more so in the realm of software. Even couple years can bring a drastic change to the tools we are using but here we are stuck with something from almost 40 years ago.</p>
+<p>Of course, there’s nothing critically bad about bash or it would be replaced a long time ago. But given all the advances in the computers in the last decades, it’s possible that we could do better. At least in the realm of user interaction, which is something which changed the most throughout all those years.</p>
+<p>That’s where <a href="http://fishshell.com/">fish</a> shell comes. An attempt to modernize shell by breaking with the POSIX compatibility. And it does quite a good job at that.</p>
+<h2 id="biggest-selling-point">Biggest selling point</h2>
+<p>What convinced me, at first, is still my favorite feature: out of the box autosuggestion. They are blazingly fast which means I can recall the previous command with the minimal effort. Plus it works across a wide spectrum of things. From files through command history up to command line options.</p>
+<p>Of course, bash has it too, but it’s hidden behind shortcuts and configuration options. On the contrary in fish, it kicks in as soon as you start typing. If you like what it found then you can invoke special shortcut (<kbd>ctrl+f</kbd>) to select it. If not you just type what you were intending to and fish will not interfere. This workflow fits me nicely in my brain and it’s something I don’t plan to give up.</p>
+<h2 id="global-variables">Global variables</h2>
+<p>Rarely I have only one shell open. They tend to multiply. Usually, by the end of the day, I may have a dozen or so with various commands or little things to try to them.</p>
+<p>If I want to change any of the shell configuration I can just do it in one and the change will be immediately be reflected in all other copies. It’s all powered by <a href="http://fishshell.com/docs/current/commands.html#set">global shell</a> variables and it saves from having to manually close each one of the shells and open it again with to reflect the new config.</p>
+<h2 id="shell-for-programmers">Shell for programmers</h2>
+<p>Anyone I know will readily admit that bash is bad as a programming language. Due to backwards compatibility, there’s a lot of weird corner cases which makes it harder than it should be. One example is setting a variable. Why I can’t put spaces around <code>=</code>? (I actually got curious and I dig out the reason: it’s because the first shell was using a macro preprocessor and that relied on this exact form. That restriction was carried forward since.)</p>
+<p>Fish was designed from the ground up as a programming language. It means there are not corner cases or obscure syntax for achieving what you want. As an example of simplicity consider that there’s no need to remember to end <code>if</code> with <code>fi</code> and <code>while</code> with <code>done</code>. It’s <code>end</code> everywhere which is so liberating. It almost makes programming shell fun.</p>
+<h2 id="bye-bye-copy-paste">Bye bye copy &amp; paste</h2>
+<p>Not everything is so rosy. The price for all those amazing features is breaking up with POSIX compatibility.</p>
+<p>In reality, it means that no code on the Internet will work as it is. It requires some translation. Usually, it’s not that difficult. In most cases search &amp; replace fixes the problem.</p>
+<p>The most annoying thing is when some application assumes POSIX shell and runs a command in a terminal. Sudden beeping means the command needs to be adjusted by hand and re-run again.</p>
+<p>It’s not that big of a deal but it gets tedious.</p>
+<h2 id="one-line-is-not-always-enough">One line is not always enough</h2>
+<p>Fish changes the way in which shell variables are handled. Instead of overloading <code>=</code> it uses special <code>set</code> statement. It’s great when inspecting a piece of code because there any variable is immediately obvious.</p>
+<p>On the other hand, it makes it impossible to set an environment variable just for one command. For example the following bit of bash:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="va">NODE_PATH=</span>./lib <span class="ex">node</span> server.js</code></pre></div>
+<p>needs to be translated into two lines in fish:</p>
+<pre class="fish"><code>$ set -x NODE_PATH ./lib
+$ node server.js</code></pre>
+<p>With more environment variables it quickly can grow out of hand.</p>
+<h2 id="ungoogleable-name">Ungoogleable name</h2>
+<p>I get that the name of fish is really Friendly Interactive Shell and I get the nice play on the sea theme. The name even alludes that it’s superior to the traditional shells because fishes can move where shells are stuck to the one place.</p>
+<p>Yet in the era of Google having a common word as an application name is a terrible idea. Finding anything regarding fish shell requires a puzzle to be solved: what other keywords will make the search query be associated with a piece of software and not with marine life. Sometimes it brings some interesting bits about the underwater world, so maybe, in the end, this is a feature?</p>
+<h2 id="summary">Summary</h2>
+<p>The breaking off from the tradition and backward compatibility on one hand brings improved user interface, matching modern software. On the other it makes it bit more difficult to take advantage of existing shell programming knowledge. Each person needs to decide if the improvements are worth the pain of using a non-standard tool.</p>
+		</section>
+
+		<footer id="post-meta" class="clearfix">
+      <hr />
+      <div class="uk-grid">
+        <p class="uk-article-meta uk-width-1-2">
+          <span>Posted on</span> March 29
+        </p>
+
+        <p class="uk-article-meta uk-width-1-2 uk-text-right">
+          <span>Written by</span> Łukasz Czyżykowski
+        </p>
+      </div>
+
+      <div class="uk-text-center">
+        <a class="uk-icon-button" href="https://twitter.com/share">
+          <img src="../images/twitter.svg" width="16" height="16" alt="twitter icon" />
+        </a>
+
+        <a class="uk-icon-button" href="#" onclick="
+            window.open(
+              'https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(location.href),
+              'facebook-share-dialog',
+              'width=626,height=436');
+            return false;">
+
+          <img src="../images/facebook.svg" width="16" height="16" alt="facebook icon" />
+        </a>
+      </div>
+		</footer>
+	</article>
+
+</section>
+
+
+        </div>
+
+        <script>
+          if (window.location.hostname === 'czyzykowski.com') {
+            (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+            })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+            ga('create', 'UA-4012543-11', 'auto');
+            ga('send', 'pageview');
+          }
+        </script>
+    </body>
+</html>
